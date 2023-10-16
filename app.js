@@ -4,7 +4,6 @@ const mongoose = require('mongoose'); //
 const helmet = require('helmet'); //
 const cors = require('cors'); //
 const limiter = require('./middlewares/limiter'); //
-// const cookieParser = require("cookie-parser");
 const router = require('./routes/index');
 
 const { PORT = 3000 } = process.env;
@@ -13,7 +12,10 @@ const app = express(); // создаем приложение на экспре�
 app.use(
   // добавляем адресса откуда разрешены запросы
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000',
+      'http://localhost:3001',
+      'http://movies-explorer.frnt.nomoredomainsrocks.ru',
+      'https://movies-explorer.frnt.nomoredomainsrocks.ru'],
   }),
 );
 app.use(express.json()); // мидлвара парсящая в JSON
