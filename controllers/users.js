@@ -1,10 +1,11 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs"); // библиотека для хеширования пароля
-const jwt = require("jsonwebtoken"); // библиотека для создания jwt
-const User = require("../models/users");
-const ConflictError = require("../errors/ConflictError");
-const BadRequestError = require("../errors/BadRequestError");
-const NotFoundError = require("../errors/NotFoundError");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // библиотека для хеширования пароля
+const jwt = require('jsonwebtoken'); // библиотека для создания jwt
+const User = require('../models/users');
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getAllUsers = (req, res, next) => {
@@ -27,9 +28,9 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequestError("Переданы некорректные данные"));
+        next(new BadRequestError('Переданы некорректные данные'));
       } else if (err.code === 11000) {
-        next(new ConflictError("Пользователь с таким email уже существует"));
+        next(new ConflictError('Пользователь с таким email уже существует'));
       } else {
         next(err);
       }
@@ -40,11 +41,12 @@ module.exports.login = (req, res, next) => {
   // запрос на логин
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password) // используем ранне написанные метод схемы findUserByCredentials
+  // используем ранне написанные метод схемы findUserByCredentials
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV !== "production" ? "some-secret-key" : JWT_SECRET
+        NODE_ENV !== 'production' ? 'some-secret-key' : JWT_SECRET,
       );
       // res.cookie("jwt", token, { maxAge: 3600, httpOnly: true }); // записали токен в куки
       res.send({ data: token });
@@ -60,7 +62,7 @@ module.exports.getUser = (req, res, next) => {
   User.findById(id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send({ data: user });
     })
@@ -73,20 +75,29 @@ module.exports.updateUser = (req, res, next) => {
   const id = req.user._id;
   const { name, email } = req.body;
 
+  // User.findOne({ email }).then((user) => {
+  //   console.log(user);
+  //   if (user) {
+  //     throw new ConflictError('Пользователь с таким email уже существует');
+  //   }
+  // });
+
   User.findByIdAndUpdate(
     id,
     { name, email },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError("Пользователь не найден");
+        throw new NotFoundError('Пользователь не найден');
       }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequestError("Переданы некорректные данные"));
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже существует'));
       } else {
         next(err);
       }

@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs"); // библиотека для хеширования пароля
-const isEmail = require("validator/lib/isEmail");
-const UnauthorizedError = require("../errors/UnauthorizedError");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs'); // библиотека для хеширования пароля
+const isEmail = require('validator/lib/isEmail');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,29 +16,29 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (v) => isEmail(v),
-      message: "Неправильный формат почты",
+      message: 'Неправильный формат почты',
     },
   },
   password: {
     type: String,
     required: true,
-    select: false, //не будет выводить пароль при запросах
+    select: false, // не будет выводить пароль при запросах
   },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }) // this - это модель User
-    .select("+password")
+    .select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(
-          new UnauthorizedError("Неправильные почта или пароль")
+          new UnauthorizedError('Неправильные почта или пароль'),
         );
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
           return Promise.reject(
-            new UnauthorizedError("Неправильные почта или пароль")
+            new UnauthorizedError('Неправильные почта или пароль'),
           );
         }
         return user;
@@ -46,4 +46,4 @@ userSchema.statics.findUserByCredentials = function (email, password) {
     });
 };
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);
