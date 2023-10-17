@@ -5,7 +5,8 @@ const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({}).then((movies) => {
+  const owner = req.user._id;
+  Movie.find({ owner }).then((movies) => {
     res.send({ data: movies }).catch((err) => next(err));
   });
 };
